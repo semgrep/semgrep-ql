@@ -1,4 +1,4 @@
-# semgrep-ql;
+# semgrep-ql
 
 Generated QL parser code for semgrep.
 
