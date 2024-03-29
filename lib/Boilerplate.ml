@@ -567,11 +567,18 @@ and map_asexprs (env : env) ((v1, v2) : CST.asexprs) =
 
 and map_call_arg (env : env) (x : CST.call_arg) =
   (match x with
-  | `Expr x -> R.Case ("Expr",
-      map_exprorterm env x
+  | `Semg_ellips tok -> R.Case ("Semg_ellips",
+      (* "..." *) token env tok
     )
-  | `Unde tok -> R.Case ("Unde",
-      (* "_" *) token env tok
+  | `Choice_expr x -> R.Case ("Choice_expr",
+      (match x with
+      | `Expr x -> R.Case ("Expr",
+          map_exprorterm env x
+        )
+      | `Unde tok -> R.Case ("Unde",
+          (* "_" *) token env tok
+        )
+      )
     )
   )
 

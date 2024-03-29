@@ -242,7 +242,10 @@ and asexpr = (exprorterm * (Token.t (* "as" *) * varname) option)
 
 and asexprs = (asexpr * (Token.t (* "," *) * asexpr) list (* zero or more *))
 
-and call_arg = [ `Expr of exprorterm | `Unde of Token.t (* "_" *) ]
+and call_arg = [
+    `Semg_ellips of Token.t (* "..." *)
+  | `Choice_expr of [ `Expr of exprorterm | `Unde of Token.t (* "_" *) ]
+]
 
 and call_or_unqual_agg_body = [
     `Call_body of (

@@ -460,8 +460,11 @@ let children_regexps : (string * Run.exp option) list = [
   "call_arg",
   Some (
     Alt [|
-      Token (Name "exprorterm");
-      Token (Name "underscore");
+      Token (Name "semgrep_ellipsis");
+      Alt [|
+        Token (Name "exprorterm");
+        Token (Name "underscore");
+      |];
     |];
   );
   "call_body",
@@ -2237,12 +2240,22 @@ and trans_call_arg ((kind, body) : mt) : CST.call_arg =
   | Children v ->
       (match v with
       | Alt (0, v) ->
-          `Expr (
-            trans_exprorterm (Run.matcher_token v)
+          `Semg_ellips (
+            trans_semgrep_ellipsis (Run.matcher_token v)
           )
       | Alt (1, v) ->
-          `Unde (
-            trans_underscore (Run.matcher_token v)
+          `Choice_expr (
+            (match v with
+            | Alt (0, v) ->
+                `Expr (
+                  trans_exprorterm (Run.matcher_token v)
+                )
+            | Alt (1, v) ->
+                `Unde (
+                  trans_underscore (Run.matcher_token v)
+                )
+            | _ -> assert false
+            )
           )
       | _ -> assert false
       )
