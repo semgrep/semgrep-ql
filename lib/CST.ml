@@ -333,6 +333,9 @@ and par_expr = [
 and primary = [
     `Semg_ellips of Token.t (* "..." *)
   | `Semg_ellips_meta of semgrep_ellipsis_metavar (*tok*)
+  | `Semg_deep_exp of (
+        Token.t (* "<..." *) * exprorterm * Token.t (* "...>" *)
+    )
   | `Call_or_unqual_agg_expr of (
         aritylesspredicateexpr
       * closure option
@@ -688,6 +691,10 @@ type quantified (* inlined *) = (
 type range (* inlined *) = (
     Token.t (* "[" *) * exprorterm * Token.t (* ".." *) * exprorterm
   * Token.t (* "]" *)
+)
+
+type semgrep_deep_expression (* inlined *) = (
+    Token.t (* "<..." *) * exprorterm * Token.t (* "...>" *)
 )
 
 type set_literal (* inlined *) = (

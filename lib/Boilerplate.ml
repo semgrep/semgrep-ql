@@ -849,6 +849,12 @@ and map_primary (env : env) (x : CST.primary) =
   | `Semg_ellips_meta tok -> R.Case ("Semg_ellips_meta",
       (* pattern \$\.\.\.[a-zA-Z_][a-zA-Z_0-9]* *) token env tok
     )
+  | `Semg_deep_exp (v1, v2, v3) -> R.Case ("Semg_deep_exp",
+      let v1 = (* "<..." *) token env v1 in
+      let v2 = map_exprorterm env v2 in
+      let v3 = (* "...>" *) token env v3 in
+      R.Tuple [v1; v2; v3]
+    )
   | `Call_or_unqual_agg_expr (v1, v2, v3) -> R.Case ("Call_or_unqual_agg_expr",
       let v1 = map_aritylesspredicateexpr env v1 in
       let v2 =

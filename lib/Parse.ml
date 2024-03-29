@@ -707,6 +707,7 @@ let children_regexps : (string * Run.exp option) list = [
     Alt [|
       Token (Name "semgrep_ellipsis");
       Token (Name "semgrep_ellipsis_metavar");
+      Token (Name "semgrep_deep_expression");
       Token (Name "call_or_unqual_agg_expr");
       Token (Name "qualified_expr");
       Token (Name "literal");
@@ -800,6 +801,14 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Literal "..");
       Token (Name "exprorterm");
       Token (Literal "]");
+    ];
+  );
+  "semgrep_deep_expression",
+  Some (
+    Seq [
+      Token (Literal "<...");
+      Token (Name "exprorterm");
+      Token (Literal "...>");
     ];
   );
   "set_literal",
@@ -2723,42 +2732,46 @@ and trans_primary ((kind, body) : mt) : CST.primary =
             trans_semgrep_ellipsis_metavar (Run.matcher_token v)
           )
       | Alt (2, v) ->
+          `Semg_deep_exp (
+            trans_semgrep_deep_expression (Run.matcher_token v)
+          )
+      | Alt (3, v) ->
           `Call_or_unqual_agg_expr (
             trans_call_or_unqual_agg_expr (Run.matcher_token v)
           )
-      | Alt (3, v) ->
+      | Alt (4, v) ->
           `Qual_expr (
             trans_qualified_expr (Run.matcher_token v)
           )
-      | Alt (4, v) ->
+      | Alt (5, v) ->
           `Lit (
             trans_literal (Run.matcher_token v)
           )
-      | Alt (5, v) ->
+      | Alt (6, v) ->
           `Var (
             trans_variable (Run.matcher_token v)
           )
-      | Alt (6, v) ->
+      | Alt (7, v) ->
           `Super_ref (
             trans_super_ref (Run.matcher_token v)
           )
-      | Alt (7, v) ->
+      | Alt (8, v) ->
           `Aggr (
             trans_aggregate (Run.matcher_token v)
           )
-      | Alt (8, v) ->
+      | Alt (9, v) ->
           `Range (
             trans_range (Run.matcher_token v)
           )
-      | Alt (9, v) ->
+      | Alt (10, v) ->
           `Set_lit (
             trans_set_literal (Run.matcher_token v)
           )
-      | Alt (10, v) ->
+      | Alt (11, v) ->
           `Par_expr (
             trans_par_expr (Run.matcher_token v)
           )
-      | Alt (11, v) ->
+      | Alt (12, v) ->
           `Expr_anno (
             trans_expr_annotation (Run.matcher_token v)
           )
@@ -2930,6 +2943,20 @@ and trans_range ((kind, body) : mt) : CST.range =
             Run.trans_token (Run.matcher_token v2),
             trans_exprorterm (Run.matcher_token v3),
             Run.trans_token (Run.matcher_token v4)
+          )
+      | _ -> assert false
+      )
+  | Leaf _ -> assert false
+
+and trans_semgrep_deep_expression ((kind, body) : mt) : CST.semgrep_deep_expression =
+  match body with
+  | Children v ->
+      (match v with
+      | Seq [v0; v1; v2] ->
+          (
+            Run.trans_token (Run.matcher_token v0),
+            trans_exprorterm (Run.matcher_token v1),
+            Run.trans_token (Run.matcher_token v2)
           )
       | _ -> assert false
       )

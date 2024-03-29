@@ -10,11 +10,11 @@ Last change in file:
 ---
 File: semgrep-grammars/src/semgrep-ql/grammar.js
 Git repo name: ocaml-tree-sitter-semgrep
-Latest commit in repo: 722af989a75914ff4f096345b9d2326ec3a318de
+Latest commit in repo: d1fb231db311dcfafb5efaca41d793ab59eecece
 Last change in file:
-  commit 722af989a75914ff4f096345b9d2326ec3a318de
+  commit d1fb231db311dcfafb5efaca41d793ab59eecece
   Author: brandonspark <wu.brandonj@gmail.com>
-  Date:   Thu Mar 28 19:10:34 2024 -0700
+  Date:   Thu Mar 28 23:38:38 2024 -0700
   
-      add ellipses and mvars in a few more places
+      add deep expression operator
 ---
