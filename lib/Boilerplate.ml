@@ -155,6 +155,9 @@ let map_pat_3bf1220 (env : env) (tok : CST.pat_3bf1220) =
 
 let map_aggid (env : env) (x : CST.aggid) =
   (match x with
+  | `Semg_meta tok -> R.Case ("Semg_meta",
+      (* semgrep_metavariable *) token env tok
+    )
   | `Avg tok -> R.Case ("Avg",
       (* "avg" *) token env tok
     )
@@ -415,10 +418,17 @@ let map_predicatealiasbody (env : env) ((v1, v2, v3) : CST.predicatealiasbody) =
   let v3 = (* ";" *) token env v3 in
   R.Tuple [v1; v2; v3]
 
-let map_vardecl (env : env) ((v1, v2) : CST.vardecl) =
-  let v1 = map_typeexpr env v1 in
-  let v2 = map_varname env v2 in
-  R.Tuple [v1; v2]
+let map_vardecl (env : env) (x : CST.vardecl) =
+  (match x with
+  | `Semg_ellips tok -> R.Case ("Semg_ellips",
+      (* "..." *) token env tok
+    )
+  | `Type_varn (v1, v2) -> R.Case ("Type_varn",
+      let v1 = map_typeexpr env v1 in
+      let v2 = map_varname env v2 in
+      R.Tuple [v1; v2]
+    )
+  )
 
 let map_moduleparam (env : env) ((v1, v2) : CST.moduleparam) =
   let v1 = map_signatureexpr env v1 in

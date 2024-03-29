@@ -117,9 +117,11 @@ let children_regexps : (string * Run.exp option) list = [
     |];
   );
   "integer", None;
+  "dbtype", None;
   "aggid",
   Some (
     Alt [|
+      Token (Name "semgrep_metavariable");
       Token (Literal "avg");
       Token (Literal "concat");
       Token (Literal "strictconcat");
@@ -134,7 +136,6 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Literal "unique");
     |];
   );
-  "dbtype", None;
   "bool",
   Some (
     Alt [|
@@ -315,10 +316,13 @@ let children_regexps : (string * Run.exp option) list = [
   );
   "vardecl",
   Some (
-    Seq [
-      Token (Name "typeexpr");
-      Token (Name "varname");
-    ];
+    Alt [|
+      Token (Name "semgrep_ellipsis");
+      Seq [
+        Token (Name "typeexpr");
+        Token (Name "varname");
+      ];
+    |];
   );
   "typealiasbody",
   Some (
@@ -1461,66 +1465,70 @@ let trans_integer ((kind, body) : mt) : CST.integer =
   | Leaf v -> v
   | Children _ -> assert false
 
+let trans_dbtype ((kind, body) : mt) : CST.dbtype =
+  match body with
+  | Leaf v -> v
+  | Children _ -> assert false
+
 let trans_aggid ((kind, body) : mt) : CST.aggid =
   match body with
   | Children v ->
       (match v with
       | Alt (0, v) ->
+          `Semg_meta (
+            trans_semgrep_metavariable (Run.matcher_token v)
+          )
+      | Alt (1, v) ->
           `Avg (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (1, v) ->
+      | Alt (2, v) ->
           `Concat (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (2, v) ->
+      | Alt (3, v) ->
           `Stri_18c266c (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (3, v) ->
+      | Alt (4, v) ->
           `Count (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (4, v) ->
+      | Alt (5, v) ->
           `Max (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (5, v) ->
+      | Alt (6, v) ->
           `Min (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (6, v) ->
+      | Alt (7, v) ->
           `Rank (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (7, v) ->
+      | Alt (8, v) ->
           `Stri_8bc2381 (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (8, v) ->
+      | Alt (9, v) ->
           `Stri_a43e15b (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (9, v) ->
+      | Alt (10, v) ->
           `Sum (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (10, v) ->
+      | Alt (11, v) ->
           `Any (
             Run.trans_token (Run.matcher_token v)
           )
-      | Alt (11, v) ->
+      | Alt (12, v) ->
           `Unique (
             Run.trans_token (Run.matcher_token v)
           )
       | _ -> assert false
       )
   | Leaf _ -> assert false
-
-let trans_dbtype ((kind, body) : mt) : CST.dbtype =
-  match body with
-  | Leaf v -> v
-  | Children _ -> assert false
 
 let trans_bool_ ((kind, body) : mt) : CST.bool_ =
   match body with
@@ -1934,10 +1942,20 @@ let trans_vardecl ((kind, body) : mt) : CST.vardecl =
   match body with
   | Children v ->
       (match v with
-      | Seq [v0; v1] ->
-          (
-            trans_typeexpr (Run.matcher_token v0),
-            trans_varname (Run.matcher_token v1)
+      | Alt (0, v) ->
+          `Semg_ellips (
+            trans_semgrep_ellipsis (Run.matcher_token v)
+          )
+      | Alt (1, v) ->
+          `Type_varn (
+            (match v with
+            | Seq [v0; v1] ->
+                (
+                  trans_typeexpr (Run.matcher_token v0),
+                  trans_varname (Run.matcher_token v1)
+                )
+            | _ -> assert false
+            )
           )
       | _ -> assert false
       )

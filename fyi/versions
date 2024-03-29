@@ -10,11 +10,11 @@ Last change in file:
 ---
 File: semgrep-grammars/src/semgrep-ql/grammar.js
 Git repo name: ocaml-tree-sitter-semgrep
-Latest commit in repo: 12fa57bd32609fab0976e94962575da53bd2aa31
+Latest commit in repo: 722af989a75914ff4f096345b9d2326ec3a318de
 Last change in file:
-  commit ff9e2d47298917f9db2a31d13bee97d5aadeacb0
+  commit 722af989a75914ff4f096345b9d2326ec3a318de
   Author: brandonspark <wu.brandonj@gmail.com>
-  Date:   Wed Mar 27 16:11:21 2024 -0700
+  Date:   Thu Mar 28 19:10:34 2024 -0700
   
-      feat: add codeql language
+      add ellipses and mvars in a few more places
 ---

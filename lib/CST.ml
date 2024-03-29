@@ -69,7 +69,8 @@ type lower_id = Token.t (* pattern [a-z][A-Za-z0-9_]* *)
 type pat_3bf1220 = Token.t (* pattern [A-Z][A-Za-z0-9_]* *)
 
 type aggid = [
-    `Avg of Token.t (* "avg" *)
+    `Semg_meta of semgrep_metavariable (*tok*)
+  | `Avg of Token.t (* "avg" *)
   | `Concat of Token.t (* "concat" *)
   | `Stri_18c266c of Token.t (* "strictconcat" *)
   | `Count of Token.t (* "count" *)
@@ -183,7 +184,10 @@ type predicatealiasbody = (
     Token.t (* "=" *) * predicateexpr * Token.t (* ";" *)
 )
 
-type vardecl = (typeexpr * varname)
+type vardecl = [
+    `Semg_ellips of Token.t (* "..." *)
+  | `Type_varn of (typeexpr * varname)
+]
 
 type moduleparam = (signatureexpr * modulename)
 
