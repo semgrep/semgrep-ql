@@ -1389,7 +1389,31 @@ let map_ql (env : env) (x : CST.ql) =
     )
   )
 
+let map_block_comment (env : env) (tok : CST.block_comment) =
+  (* pattern \/\*([^*]+\*+([^/*][^*]*\*+)*|\*\
+  )\/ *) token env tok
+
+let map_line_comment (env : env) (tok : CST.line_comment) =
+  (* pattern \/\/[^\r\n]* *) token env tok
+
 let dump_tree root =
   map_ql () root
-  |> Tree_sitter_run.Raw_tree.to_string
-  |> print_string
+  |> Tree_sitter_run.Raw_tree.to_channel stdout
+
+let map_extra (env : env) (x : CST.extra) =
+  match x with
+  | Line_comment (_loc, x) -> ("line_comment", "line_comment", map_line_comment env x)
+  | Block_comment (_loc, x) -> ("block_comment", "block_comment", map_block_comment env x)
+
+let dump_extras (extras : CST.extras) =
+  List.iter (fun extra ->
+    let ts_rule_name, ocaml_type_name, raw_tree = map_extra () extra in
+    let details =
+      if ocaml_type_name <> ts_rule_name then
+        Printf.sprintf " (OCaml type '%s')" ocaml_type_name
+      else
+        ""
+    in
+    Printf.printf "%s%s:\n" ts_rule_name details;
+    Tree_sitter_run.Raw_tree.to_channel stdout raw_tree
+  ) extras

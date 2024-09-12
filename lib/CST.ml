@@ -737,3 +737,10 @@ type higherorderterm (* inlined *) = (
   * anon_call_arg_rep_COMMA_call_arg_25882ee option
   * Token.t (* ")" *)
 )
+
+type extra = 
+    Line_comment of Loc.t * line_comment
+  | Block_comment of Loc.t * block_comment
+
+
+type extras = extra list

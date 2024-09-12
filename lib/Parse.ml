@@ -37,6 +37,7 @@ let children_regexps : (string * Run.exp option) list = [
   "float", None;
   "result", None;
   "semgrep_ellipsis_metavar", None;
+  "line_comment", None;
   "true", None;
   "closure",
   Some (
@@ -116,6 +117,7 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Literal "-");
     |];
   );
+  "block_comment", None;
   "integer", None;
   "dbtype", None;
   "aggid",
@@ -1236,6 +1238,10 @@ let trans_semgrep_ellipsis_metavar ((kind, body) : mt) : CST.semgrep_ellipsis_me
   | Leaf v -> v
   | Children _ -> assert false
 
+let trans_line_comment ((kind, body) : mt) : CST.line_comment =
+  match body with
+  | Leaf v -> v
+  | Children _ -> assert false
 
 let trans_true_ ((kind, body) : mt) : CST.true_ =
   match body with
@@ -1471,6 +1477,10 @@ let trans_unop ((kind, body) : mt) : CST.unop =
       )
   | Leaf _ -> assert false
 
+let trans_block_comment ((kind, body) : mt) : CST.block_comment =
+  match body with
+  | Leaf v -> v
+  | Children _ -> assert false
 
 let trans_integer ((kind, body) : mt) : CST.integer =
   match body with
@@ -3818,14 +3828,53 @@ let trans_ql ((kind, body) : mt) : CST.ql =
       )
   | Leaf _ -> assert false
 
+(*
+   Costly operation that translates a whole tree or subtree.
+
+   The first pass translates it into a generic tree structure suitable
+   to guess which node corresponds to each grammar rule.
+   The second pass is a translation into a typed tree where each grammar
+   node has its own type.
+
+   This function is called:
+   - once on the root of the program after removing extras
+     (comments and other nodes that occur anywhere independently from
+     the grammar);
+   - once of each extra node, resulting in its own independent tree of type
+     'extra'.
+*)
+let translate_tree src node trans_x =
+  let matched_tree = Run.match_tree children_regexps src node in
+  Option.map trans_x matched_tree
+
+
+let translate_extra src (node : Tree_sitter_output_t.node) : CST.extra option =
+  match node.type_ with
+  | "line_comment" ->
+      (match translate_tree src node trans_line_comment with
+      | None -> None
+      | Some x -> Some (Line_comment (Run.get_loc node, x)))
+  | "block_comment" ->
+      (match translate_tree src node trans_block_comment with
+      | None -> None
+      | Some x -> Some (Block_comment (Run.get_loc node, x)))
+  | _ -> None
+
+let translate_root src root_node =
+  translate_tree src root_node trans_ql
+
 let parse_input_tree input_tree =
   let orig_root_node = Tree_sitter_parsing.root input_tree in
   let src = Tree_sitter_parsing.src input_tree in
   let errors = Run.extract_errors src orig_root_node in
-  let root_node = Run.remove_extras ~extras orig_root_node in
-  let matched_tree = Run.match_tree children_regexps src root_node in
-  let opt_program = Option.map trans_ql matched_tree in
-  Parsing_result.create src opt_program errors
+  let opt_program, extras =
+     Run.translate
+       ~extras
+       ~translate_root:(translate_root src)
+       ~translate_extra:(translate_extra src)
+       orig_root_node
+  in
+  Parsing_result.create src opt_program extras errors
 
 let string ?src_file contents =
   let input_tree = parse_source_string ?src_file contents in
