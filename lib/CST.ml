@@ -738,9 +738,9 @@ type higherorderterm (* inlined *) = (
   * Token.t (* ")" *)
 )
 
-type extra = 
-    Line_comment of Loc.t * line_comment
-  | Block_comment of Loc.t * block_comment
-
+type extra = [
+    `Line_comment of Loc.t * line_comment
+  | `Block_comment of Loc.t * block_comment
+]
 
 type extras = extra list
